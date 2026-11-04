@@ -28,6 +28,8 @@ public interface Graph {
 
     Map<String, String> attributeTags(int attributesId);
 
+    int edgeSegment(int edge);
+
     boolean isReverse(int edge);
 
     long edgeWayId(int edge);

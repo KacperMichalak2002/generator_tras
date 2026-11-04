@@ -4,6 +4,7 @@ import com.wsyska.kmichalak.routegenerator.graph.CsrGraph;
 import com.wsyska.kmichalak.routegenerator.graph.GeoUtils;
 import com.wsyska.kmichalak.routegenerator.routing.Dijkstra;
 import com.wsyska.kmichalak.routegenerator.routing.EdgeCost;
+import com.wsyska.kmichalak.routegenerator.routing.GeoJson;
 import com.wsyska.kmichalak.routegenerator.routing.PathResult;
 import org.junit.jupiter.api.Test;
 
@@ -191,7 +192,7 @@ class OsmGraphImporterTest {
         CsrGraph g = importFixture(1).graph();
         PathResult path = new Dijkstra(g).route(node(g, 1), node(g, 7), EdgeCost.DISTANCE).orElseThrow();
 
-        String json = GraphImportDemo.toGeoJson(g, path);
+        String json = GeoJson.feature(g, path, Map.of("lengthKm", 1.5));
 
         // 1 -(2)- 3 -(6)- 7: pięć punktów, punkt 3 tylko raz
         assertEquals(5, json.split("\\],\\[").length);

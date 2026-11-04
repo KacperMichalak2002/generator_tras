@@ -5,6 +5,7 @@ import com.wsyska.kmichalak.routegenerator.graph.GeoUtils;
 import com.wsyska.kmichalak.routegenerator.graph.Graph;
 import com.wsyska.kmichalak.routegenerator.routing.Dijkstra;
 import com.wsyska.kmichalak.routegenerator.routing.EdgeCost;
+import com.wsyska.kmichalak.routegenerator.routing.GeoJson;
 import com.wsyska.kmichalak.routegenerator.routing.PathResult;
 
 import java.io.IOException;
@@ -53,11 +54,11 @@ public final class GraphImportDemo {
         System.out.printf(Locale.ROOT, "Trasa: %.2f km, %d krawędzi, Dijkstra %d ms%n",
                 p.lengthM() / 1000, p.edges().length, ms);
         if (args.length == 6) {
-            Files.writeString(Path.of(args[5]), toGeoJson(graph, p));
+            Files.writeString(Path.of(args[5]), GeoJson.feature(graph, p,
+                    Map.of("lengthKm", Math.round(p.lengthM()) / 1000.0)));
             System.out.println("Zapisano " + args[5] + " (podgląd: geojson.io)");
         }
     }
-
 
     static EdgeCost demoBikeCost(Graph graph) {
         int n = graph.attributeCount();
@@ -91,7 +92,6 @@ public final class GraphImportDemo {
         return access == null || !NO_ACCESS.contains(access);
     }
 
-    // Przeszukanie wszystkich węzłów; wystarcza do demo. Właściwe przyciąganie do drogi to FR-16.
     static int nearestNode(Graph graph, double lat, double lon) {
         int best = -1;
         double bestDist = Double.POSITIVE_INFINITY;
@@ -108,25 +108,7 @@ public final class GraphImportDemo {
         return best;
     }
 
-    static String toGeoJson(Graph graph, PathResult path) {
-        StringBuilder sb = new StringBuilder(
-                "{\"type\":\"Feature\",\"properties\":{\"lengthKm\":");
-        sb.append(String.format(Locale.ROOT, "%.3f", path.lengthM() / 1000));
-        sb.append("},\"geometry\":{\"type\":\"LineString\",\"coordinates\":[");
-        int[] edges = path.edges();
-        for (int k = 0; k < edges.length; k++) {
-            int e = edges[k];
-            for (int i = k == 0 ? 0 : 1; i < graph.edgePointCount(e); i++) {
-                if (k > 0 || i > 0) {
-                    sb.append(',');
-                }
-                sb.append(String.format(Locale.ROOT, "[%.7f,%.7f]", graph.edgePointLon(e, i), graph.edgePointLat(e, i)));
-            }
-        }
-        return sb.append("]}}").toString();
-    }
-
-    private static void printStats(OsmGraphImporter.Stats s) {
+    static void printStats(OsmGraphImporter.Stats s) {
         System.out.printf(Locale.ROOT, """
                 Drogi w pliku:            %,d
                 Drogi w grafie:           %,d

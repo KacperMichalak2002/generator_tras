@@ -109,6 +109,11 @@ public final class CsrGraph implements Graph {
     }
 
     @Override
+    public int edgeSegment(int edge) {
+        return edgeSegDir[edge] >>> 1;
+    }
+
+    @Override
     public boolean isReverse(int edge) {
         return (edgeSegDir[edge] & 1) != 0;
     }
@@ -136,7 +141,6 @@ public final class CsrGraph implements Graph {
         return geom >= 0 ? geomLon[geom] : lon[endpoint(edge, index)];
     }
 
-    // Indeks w geomLat/geomLon dla punktu pośredniego albo -1 dla końca krawędzi.
     private int geometryIndex(int edge, int index) {
         int count = edgePointCount(edge);
         if (index < 0 || index >= count) {
