@@ -10,11 +10,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^7.3.1",
+    "@fortawesome/free-solid-svg-icons": "^7.3.1",
+    "@fortawesome/react-fontawesome": "^3.5.0",
+    "@tailwindcss/vite": "^4.3.5",
     "@tanstack/react-query": "^5.105.3",
     "axios": "^1.21.0",
     "maplibre-gl": "^6.16.0",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "tailwindcss": "^4.3.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

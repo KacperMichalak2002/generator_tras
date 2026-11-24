@@ -1,8 +1,0 @@
-.app {
-  height: 100%;
-  display: flex;
-}
-.map {
-  flex: 1;
-  min-height: 0;
-}

@@ -21,7 +21,7 @@ function MapView() {
     return () => map.remove();
   }, []);
 
-  return <div ref={containerRef} className="map" />;
+  return <div ref={containerRef} className="min-h-0 flex-1" />;
 }
 
 export default MapView;
