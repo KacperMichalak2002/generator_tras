@@ -3,6 +3,7 @@ package com.wsyska.kmichalak.routegenerator.osm;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 
 public final class RoadFilter {
@@ -30,6 +31,10 @@ public final class RoadFilter {
 
     public static RoadFilter defaults() {
         return new RoadFilter(ROUTABLE_HIGHWAYS, KEPT_TAG_KEYS);
+    }
+
+    public String fingerprint() {
+        return String.join(",", new TreeSet<>(highways)) + "|" + String.join(",", new TreeSet<>(keptKeys));
     }
 
     public boolean accepts(Map<String, String> tags) {

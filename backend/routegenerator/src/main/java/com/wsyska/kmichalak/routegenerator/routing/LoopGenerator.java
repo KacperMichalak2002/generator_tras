@@ -5,7 +5,6 @@ import com.wsyska.kmichalak.routegenerator.graph.Graph;
 import com.wsyska.kmichalak.routegenerator.graph.SpatialIndex;
 
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Optional;
 import java.util.SplittableRandom;
 
@@ -45,6 +44,8 @@ public final class LoopGenerator {
             return path.lengthM() == 0 ? 0 : reusedLengthM / path.lengthM();
         }
     }
+
+    private static final double BOUNDS_FACTOR = 0.75;
 
     private final Graph graph;
     private final SpatialIndex index;
@@ -117,23 +118,25 @@ public final class LoopGenerator {
         }
         waypoints = Arrays.copyOf(waypoints, count);
 
-        BitSet usedSegments = new BitSet(graph.edgeCount());
+        IntHashSet usedSegments = new IntHashSet(256);
         EdgeCost penalized = (g, e) -> {
             double c = cost.cost(g, e);
-            return usedSegments.get(g.edgeSegment(e)) ? c * options.reusePenalty() : c;
+            return usedSegments.contains(g.edgeSegment(e)) ? c * options.reusePenalty() : c;
         };
+        // Pętla o długości L nie oddala się od startu o więcej niż L/2; zostawiamy zapas.
+        SearchBounds bounds = SearchBounds.circle(graph.lat(start), graph.lon(start), BOUNDS_FACTOR * distanceM);
 
         int[] edges = new int[64];
         int edgeCount = 0;
         int current = start;
         for (int i = 0; i <= count; i++) {
             int target = i < count ? waypoints[i] : start;
-            Optional<PathResult> leg = dijkstra.route(current, target, penalized);
+            Optional<PathResult> leg = dijkstra.route(current, target, penalized, bounds);
             if (leg.isEmpty()) {
                 return Optional.empty();
             }
             for (int e : leg.get().edges()) {
-                usedSegments.set(graph.edgeSegment(e));
+                usedSegments.add(graph.edgeSegment(e));
                 if (edgeCount == edges.length) {
                     edges = Arrays.copyOf(edges, edgeCount * 2);
                 }
@@ -150,17 +153,15 @@ public final class LoopGenerator {
         double length = 0;
         double totalCost = 0;
         double reused = 0;
-        BitSet seen = new BitSet(graph.edgeCount());
+        IntHashSet seen = new IntHashSet(edges.length);
         for (int i = 0; i < edges.length; i++) {
             int e = edges[i];
             nodes[i + 1] = graph.edgeTarget(e);
             length += graph.edgeLength(e);
             totalCost += cost.cost(graph, e);
-            int segment = graph.edgeSegment(e);
-            if (seen.get(segment)) {
+            if (!seen.add(graph.edgeSegment(e))) {
                 reused += graph.edgeLength(e);
             }
-            seen.set(segment);
         }
         return new LoopResult(new PathResult(nodes, edges, totalCost, length), waypoints, targetM, attempts, reused);
     }

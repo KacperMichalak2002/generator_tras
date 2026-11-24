@@ -31,8 +31,7 @@ public final class GraphImportDemo {
             System.err.println("Użycie: GraphImportDemo <plik.osm.pbf> [latA lonA latB lonB [trasa.geojson]]");
             System.exit(1);
         }
-        OsmGraphImporter.Result result = OsmGraphImporter.importFile(Path.of(args[0]));
-        printStats(result.stats());
+        GraphLoader.Loaded result = load(Path.of(args[0]));
         if (args.length == 1) {
             return;
         }
@@ -106,6 +105,18 @@ public final class GraphImportDemo {
             }
         }
         return best;
+    }
+
+    // Wczytanie grafu z pliku .graph (szybko) albo import PBF (pierwszy raz), z wypisaniem statystyk.
+    static GraphLoader.Loaded load(Path pbf) throws IOException {
+        GraphLoader.Loaded loaded = GraphLoader.load(pbf);
+        if (loaded.importStats() != null) {
+            printStats(loaded.importStats());
+        }
+        System.out.printf(Locale.ROOT, "Graf: %,d węzłów, %,d krawędzi, %.1f MB, %s w %,d ms (%s)%n",
+                loaded.graph().nodeCount(), loaded.graph().edgeCount(), loaded.graph().estimatedBytes() / 1e6,
+                loaded.fromGraphFile() ? "wczytany z pliku" : "zaimportowany", loaded.millis(), loaded.note());
+        return loaded;
     }
 
     static void printStats(OsmGraphImporter.Stats s) {

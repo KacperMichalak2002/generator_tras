@@ -5,23 +5,23 @@ import java.util.Map;
 
 public final class CsrGraph implements Graph {
 
-    private final float[] lat;
-    private final float[] lon;
+    final float[] lat;
+    final float[] lon;
 
-    private final int[] offsets;
-    private final int[] targets;
-    private final int[] edgeSegDir;
+    final int[] offsets;
+    final int[] targets;
+    final int[] edgeSegDir;
 
-    private final int[] segFrom;
-    private final int[] segTo;
-    private final float[] segLength;
-    private final int[] segAttributes;
-    private final long[] segWayId;
-    private final int[] segGeomStart;
-    private final float[] geomLat;
-    private final float[] geomLon;
+    final int[] segFrom;
+    final int[] segTo;
+    final float[] segLength;
+    final int[] segAttributes;
+    final long[] segWayId;
+    final int[] segGeomStart;
+    final float[] geomLat;
+    final float[] geomLon;
 
-    private final List<Map<String, String>> attributes;
+    final List<Map<String, String>> attributes;
 
     CsrGraph(float[] lat, float[] lon, int[] offsets, int[] targets, int[] edgeSegDir,
              int[] segFrom, int[] segTo, float[] segLength, int[] segAttributes, long[] segWayId,

@@ -34,9 +34,7 @@ public final class LoopDemo {
         double km = Double.parseDouble(args[3]);
         long seed = args.length >= 5 ? Long.parseLong(args[4]) : 1;
 
-        OsmGraphImporter.Result imported = OsmGraphImporter.importFile(Path.of(args[0]));
-        GraphImportDemo.printStats(imported.stats());
-        CsrGraph graph = imported.graph();
+        CsrGraph graph = GraphImportDemo.load(Path.of(args[0])).graph();
 
         long t0 = System.nanoTime();
         SpatialIndex index = SpatialIndex.build(graph, 250);
