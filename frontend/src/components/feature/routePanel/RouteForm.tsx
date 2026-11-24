@@ -1,6 +1,8 @@
 import { faRoute } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState, type FormEvent } from "react";
+import type { FormEvent } from "react";
+import useGenerateRoutes from "../../../hooks/useGenerateRoutes";
+import { useRouteStore } from "../../../stores/routeStore";
 import type {
   RouteParams,
   SubprofileId,
@@ -14,30 +16,23 @@ const segmented = "flex overflow-hidden rounded-lg border border-line";
 const segment =
   "flex flex-1 cursor-pointer items-center justify-center gap-1.5 bg-white px-1 py-2 not-first:border-l not-first:border-line aria-pressed:bg-primary-soft aria-pressed:font-semibold aria-pressed:text-primary";
 
-const DEFAULT_PARAMS: RouteParams = {
-  vehicle: "bike",
-  subprofile: "bike_road",
-  distanceKm: 50,
-  curviness: 50,
-  avoidMainRoads: true,
-};
-
 function RouteForm() {
-  const [params, setParams] = useState<RouteParams>(DEFAULT_PARAMS);
+  const params = useRouteStore((s) => s.params);
+  const updateParams = useRouteStore((s) => s.updateParams);
+  const { generate, isPending, error } = useGenerateRoutes();
   const sub = findSubprofile(params.subprofile);
 
   function update<K extends keyof RouteParams>(key: K, value: RouteParams[K]) {
-    setParams((p) => ({ ...p, [key]: value }));
+    updateParams({ [key]: value });
   }
 
   function selectSubprofile(id: SubprofileId, vehicle = params.vehicle) {
     const s = findSubprofile(id);
-    setParams((p) => ({
-      ...p,
+    updateParams({
       vehicle,
       subprofile: id,
-      distanceKm: clamp(p.distanceKm, s.minKm, s.maxKm),
-    }));
+      distanceKm: clamp(params.distanceKm, s.minKm, s.maxKm),
+    });
   }
 
   function selectVehicle(vehicle: VehicleType) {
@@ -46,7 +41,7 @@ function RouteForm() {
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    console.log("[route] generuj (dummy):", params);
+    generate(params);
   }
 
   return (
@@ -154,18 +149,22 @@ function RouteForm() {
 
       <div className={group}>
         <span className={label}>Start</span>
-        <small className="text-muted">
-          Kliknij na mapie, aby wybrać punkt startu (wkrótce)
-        </small>
       </div>
 
       <button
         type="submit"
-        className="flex cursor-pointer items-center justify-center gap-2 rounded-full bg-primary p-3 font-semibold text-white hover:bg-primary-hover"
+        disabled={isPending}
+        className="flex cursor-pointer items-center justify-center gap-2 rounded-full bg-primary p-3 font-semibold text-white hover:bg-primary-hover disabled:cursor-wait disabled:opacity-60"
       >
         <FontAwesomeIcon icon={faRoute} />
-        Generuj trasę
+        {isPending ? "Wczytywanie…" : "Generuj trasę"}
       </button>
+
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error.message}
+        </p>
+      )}
     </form>
   );
 }
